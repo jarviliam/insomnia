@@ -59,7 +59,6 @@ class SidebarRequestRow extends PureComponent<Props, State> {
         isEditing: false,
         renderedUrl: '',
     }
-    _requestRef: React.RefObject<HTMLDivElement> = React.createRef();
 
     _urlUpdateInterval: NodeJS.Timeout | null = null;
     _requestActionsDropdown: RequestActionsDropdown | null = null;
@@ -221,17 +220,7 @@ class SidebarRequestRow extends PureComponent<Props, State> {
             'sidebar__row--dragging-above': isDraggingOver && dragDirection > 0,
             'sidebar__row--dragging-below': isDraggingOver && dragDirection < 0,
         });
-        // const indentStyle = {
-        //     "width" : this._requestRef?.current?.style?.paddingLeft
-        // }
 
-        let indentStyle = {}
-        if (this._requestRef != null && this._requestRef.current != null) {
-            const styles = window.getComputedStyle(this._requestRef.current)
-            const left = Number(styles.paddingLeft.slice(0, -2))
-            console.log(left);
-            indentStyle = { ...indentStyle, "width": left + "px" }
-        }
         if (!request) {
             node = (
                 <li className={classes}>
@@ -255,14 +244,11 @@ class SidebarRequestRow extends PureComponent<Props, State> {
                         className={classnames('sidebar__item', 'sidebar__item--request', {
                             'sidebar__item--active': isActive,
                         })}>
-                        {isDraggingOver &&
-                            <div className="drag-indent" style={indentStyle} />
-                        }
                         <button
                             className="wide"
                             onClick={this._handleRequestActivate}
                             onContextMenu={this._handleShowRequestActions}>
-                            <div className="sidebar__clickable" ref={this._requestRef}>
+                            <div className="sidebar__clickable">
                                 {methodTag}
                                 <Editable
                                     value={request.name}

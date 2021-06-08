@@ -73,7 +73,6 @@ class SidebarRequestGroupRow extends PureComponent<Props, State> {
   }
 
   setDragDirection(dragDirection) {
-    console.log("dragDirection ===" + dragDirection)
     if (dragDirection !== this.state.dragDirection) {
       this.setState({
         dragDirection,
@@ -142,7 +141,7 @@ class SidebarRequestGroupRow extends PureComponent<Props, State> {
       ),
     );
     return (
-      <li key={requestGroup._id} data-test="test" className={classes}>
+      <li key={requestGroup._id} className={classes}>
         <div
           className={classnames('sidebar__item sidebar__item--big', {
             'sidebar__item--active': isActive,

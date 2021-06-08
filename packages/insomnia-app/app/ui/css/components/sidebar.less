@@ -182,7 +182,7 @@
 
   .sidebar__list-root {
     box-shadow: inset 0 2rem 2rem -2rem rgba(0, 0, 0, 0.03);
-
+    padding: 1px 1px;
     overflow-y: auto;
 
     &::-webkit-scrollbar {
@@ -223,7 +223,7 @@
     }
     &.sidebar__row--dragging-center{
         & > .sidebar__item{
-        border:2px dotted var(--color-surprise);
+        outline:2px dotted var(--color-surprise);
         }
     }
     &.sidebar__row--dragging-below::after,
@@ -257,14 +257,6 @@
 
     &.sidebar__item--big {
       grid-template-rows: var(--line-height-sm);
-    }
-
-    .drag-indent{
-        position:absolute;
-        top:50%;
-        height:1px;
-        border-bottom: 2px dotted var(--color-surprise);
-        left: 0px;
     }
 
     &.sidebar__item--active > button {
