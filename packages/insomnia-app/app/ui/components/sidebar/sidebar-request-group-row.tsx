@@ -73,6 +73,7 @@ class SidebarRequestGroupRow extends PureComponent<Props, State> {
   }
 
   setDragDirection(dragDirection) {
+    console.log("dragDirection ===" + dragDirection)
     if (dragDirection !== this.state.dragDirection) {
       this.setState({
         dragDirection,
@@ -109,6 +110,7 @@ class SidebarRequestGroupRow extends PureComponent<Props, State> {
       'sidebar__row--dragging': isDragging,
       'sidebar__row--dragging-above': isDraggingOver && dragDirection > 0,
       'sidebar__row--dragging-below': isDraggingOver && dragDirection < 0,
+      'sidebar__row--dragging-center': isDraggingOver && dragDirection == 0,
     });
     // NOTE: We only want the button draggable, not the whole container (ie. no children)
     // @ts-expect-error -- TSCONVERSION
@@ -140,7 +142,7 @@ class SidebarRequestGroupRow extends PureComponent<Props, State> {
       ),
     );
     return (
-      <li key={requestGroup._id} className={classes}>
+      <li key={requestGroup._id} data-test="test" className={classes}>
         <div
           className={classnames('sidebar__item sidebar__item--big', {
             'sidebar__item--active': isActive,
@@ -211,6 +213,13 @@ function isAbove(monitor, component) {
   const draggedTop = monitor.getSourceClientOffset().y;
   return hoveredTop > draggedTop;
 }
+function isBelow(monitor, component) {
+  const hoveredNode = ReactDOM.findDOMNode(component);
+  // @ts-expect-error -- TSCONVERSION
+  const hoveredTop = hoveredNode.getBoundingClientRect().bottom;
+  const draggedTop = monitor.getSourceClientOffset().y;
+  return hoveredTop < draggedTop;
+}
 
 function isOnExpandTag(monitor, component) {
   const rect = component.getExpandTag().getBoundingClientRect();
@@ -228,22 +237,40 @@ const dragTarget = {
     const movingDoc = monitor.getItem().requestGroup || monitor.getItem().request;
     const parentId = props.requestGroup.parentId;
     const targetId = props.requestGroup._id;
-
     if (isAbove(monitor, component)) {
       props.moveDoc(movingDoc, parentId, targetId, 1);
-    } else {
+    } else if(isBelow(monitor,component)){
       props.moveDoc(movingDoc, parentId, targetId, -1);
+    } else {
+      props.moveDoc(movingDoc, parentId, targetId, 0);
     }
   },
 
   hover(props, monitor, component) {
-    if (props.isCollapsed && isOnExpandTag(monitor, component)) {
+    //If Closed
+    if(props.isCollapsed){
+        //If On expand
+        if(isOnExpandTag(monitor,component)){
       component.props.handleSetRequestGroupCollapsed(props.requestGroup._id, false);
       component.setDragDirection(0);
-    } else if (isAbove(monitor, component)) {
+        }else{
+        if (isAbove(monitor, component)) {
+        component.setDragDirection(1);
+            } else if(isBelow(monitor,component)){
+        component.setDragDirection(-1);
+            }
+            else {
+        component.setDragDirection(0);
+            }
+        }
+    }else{
+    if (isAbove(monitor, component)) {
       component.setDragDirection(1);
-    } else {
+    } else if(isBelow(monitor,component)){
       component.setDragDirection(-1);
+    }else{
+        component.setDragDirection(0);
+    }
     }
   },
 };

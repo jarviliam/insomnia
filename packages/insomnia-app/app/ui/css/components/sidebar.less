@@ -221,7 +221,11 @@
         opacity: 0.3;
       }
     }
-
+    &.sidebar__row--dragging-center{
+        & > .sidebar__item{
+        border:2px dotted var(--color-surprise);
+        }
+    }
     &.sidebar__row--dragging-below::after,
     &.sidebar__row--dragging-above::before {
       position: absolute;
@@ -253,6 +257,14 @@
 
     &.sidebar__item--big {
       grid-template-rows: var(--line-height-sm);
+    }
+
+    .drag-indent{
+        position:absolute;
+        top:50%;
+        height:1px;
+        border-bottom: 2px dotted var(--color-surprise);
+        left: 0px;
     }
 
     &.sidebar__item--active > button {

@@ -1735,6 +1735,11 @@ async function _moveDoc(docToMove, parentId, targetId, targetOffset) {
     return;
   }
 
+ //If Dropping on Folder while already belonging in said folder. Nothing.
+ if (targetId === docToMove.parentId && targetOffset === 0){
+     return;
+ }
+
   // Don't allow dragging things into itself or children. This will disconnect
   // the node from the tree and cause the item to no longer show in the UI.
   const descendents = await db.withDescendants(docToMove);
@@ -1770,20 +1775,39 @@ async function _moveDoc(docToMove, parentId, targetId, targetOffset) {
     const doc = docs[i];
 
     if (doc._id === targetId) {
-      let before, after;
+      let before, after, beforeKey,afterKey;
 
       if (targetOffset < 0) {
         // We're moving to below
         before = docs[i];
         after = docs[i + 1];
-      } else {
+      } else if(targetOffset > 0) {
         // We're moving to above
         before = docs[i - 1];
         after = docs[i];
+      }else{
+        if(doc.type === "Request"){
+        // We're moving to below
+        before = docs[i];
+        after = docs[i + 1];
+        }else{
+         //Insert (Group + 0)
+          const innerFolder = [...(await models.request.findByParentId(doc._id)),
+    ...(await models.grpcRequest.findByParentId(parentId)),
+    ...(await models.requestGroup.findByParentId(parentId))]
+            .sort((a, b) => (a.metaSortKey < b.metaSortKey ? -1 : 1));
+          before = innerFolder[innerFolder.length - 1];
+          parentId = doc._id;
+          beforeKey = before.metaSortKey
+          afterKey = before.metaSortKey + 100;
+        }
       }
-
-      const beforeKey = before ? before.metaSortKey : docs[0].metaSortKey - 100;
-      const afterKey = after ? after.metaSortKey : docs[docs.length - 1].metaSortKey + 100;
+      if(beforeKey == undefined){
+      beforeKey = before ? before.metaSortKey : docs[0].metaSortKey - 100;
+      }
+     if(afterKey == undefined){
+     afterKey = after ? after.metaSortKey : docs[docs.length - 1].metaSortKey + 100;
+      }
 
       if (Math.abs(afterKey - beforeKey) < 0.000001) {
         // If sort keys get too close together, we need to redistribute the list. This is
